@@ -1,54 +1,63 @@
-// === ARQUIVO 3: run.js ===
-// Script de demonstração das duas abordagens lado a lado
-// Parte 1: UserRepository diretamente (dados brutos)
-// Parte 2: UserService (dados formatados)
-// Use console.table() para exibir e try/catch em ambas
+/*
+  run.js - Demonstration script for UserRepository and UserService
+  ---------------------------------------------------------------
+  Part 1: Raw data retrieval from UserRepository
+  Part 2: Formatted data via UserService (id, name, email)
+  Part 3: Fetching specific user by ID
+*/
 
 import { UserRepository } from './UserRepository.js';
 import { UserService } from './UserService.js';
 
-// Função principal para demonstrar as abordagens
-async function demonstrarAbordagens() {
-  console.log('=== PARTE 1: UserRepository diretamente (dados BRUTOS) ===');
+async function runDemonstration() {
+  // Shared repository instance
+  const userRepository = new UserRepository();
+
+  console.log('=== PART 1: UserRepository (RAW DATA) ===');
   try {
-    const repositorio = new UserRepository();
-    const usuariosBrutos = await repositorio.getUsers();
-    console.table(usuariosBrutos);
-    console.log(`\nTotal de usuários brutos: ${usuariosBrutos.length}`);
-  } catch (erro) {
-    console.error('Erro na Parte 1:', erro.message);
+    const rawUsers = await userRepository.getUsers();
+    console.table(rawUsers);
+    console.log(`\nTotal raw users retrieved: ${rawUsers.length}`);
+  } catch (error) {
+    console.error('Error in Part 1:', error.message);
   }
 
-  console.log('\n=== PARTE 2: UserService (dados FORMATADOS: id, name, email) ===');
+  console.log('\n=== PART 2: UserService (FORMATTED DATA: id, name, email) ===');
+  const userService = new UserService(userRepository);
   try {
-    const repositorio = new UserRepository();
-    const servico = new UserService(repositorio);
-    const usuariosFormatados = await servico.getUsers();
-    console.table(usuariosFormatados);
-    console.log(`\nTotal de usuários formatados: ${usuariosFormatados.length}`);
-  } catch (erro) {
-    console.error('Erro na Parte 2:', erro.message);
+    // Injecting dependency via constructor
+    const formattedUsers = await userService.getUsers();
+    console.table(formattedUsers);
+    console.log(`\nTotal formatted users: ${formattedUsers.length}`);
+  } catch (error) {
+    console.error('Error in Part 2:', error.message);
   }
 
-  console.log('\n=== PARTE 3: UserService (USER BY ID) ===');
+  console.log('\n=== PART 3: UserService (GET USER BY ID) ===');
   try {
-    const repositorio = new UserRepository();
-    const servico = new UserService(repositorio);
-    const user = await servico.getUsersById(1);
-    console.log(user);
-  } catch (erro) {
-    console.error('Erro na Parte 3:', erro.message);
+    // const userService = new UserService(userRepository);
+    const userId = 1;
+    const user = await userService.getUsersById(userId);
+    
+    user ? console.log(`User found (ID ${userId}):`, user) : console.log(`User with ID ${userId} not found.`);
+
+  } catch (error) {
+    console.error('Error in Part 3:', error.message);
   }
 }
 
-// Executa a demonstração
+// Self-invoking execution block
 (async () => {
-  await demonstrarAbordagens();
+  try {
+    await runDemonstration();
+  } catch (criticalError) {
+    console.error('Critical failure in execution:', criticalError.message);
+  }
 })();
 
 /*
-INSTRUÇÕES PARA EXECUTAR:
-1. Crie uma pasta e salve os 3 arquivos.
-2. Crie package.json com: {"type": "module"}
-3. Rode: node run.js (Node.js 18+ com fetch nativo)
+  EXECUTION STEPS:
+  1. Ensure all 3 files (UserRepository.js, UserService.js, run.js) are in the same folder.
+  2. Verify package.json contains: { "type": "module" }
+  3. Run command: node run.js
 */

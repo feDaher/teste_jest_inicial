@@ -29,6 +29,16 @@ async function demonstrarAbordagens() {
   } catch (erro) {
     console.error('Erro na Parte 2:', erro.message);
   }
+
+  console.log('\n=== PARTE 3: UserService (USER BY ID) ===');
+  try {
+    const repositorio = new UserRepository();
+    const servico = new UserService(repositorio);
+    const user = await servico.getUsersById(1);
+    console.log(user);
+  } catch (erro) {
+    console.error('Erro na Parte 3:', erro.message);
+  }
 }
 
 // Executa a demonstração

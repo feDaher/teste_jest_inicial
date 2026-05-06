@@ -1,47 +1,92 @@
-// ===== UserRepository.js =====
-// Camada de Repositório: Responsável pelo acesso direto aos dados (API).
+/*
+  UserRepository.spec.js - Arquivo de teste corrigido
+  Correções aplicadas:
+  - URL esperada: 'https://jsonplaceholder.typicode.com/users'
+  - Mensagem de erro: 'Erro ao buscar usuários: Erro HTTP! Status: 500'
+  - Mantida estrutura com comentários didáticos linha a linha
+*/
 
-export class UserRepository {
-  async getUsers() {
-    try {
-      // fetch() é uma função assíncrona que retorna uma Promise.
-      // O 'await' pausa a execução até que a Promise seja resolvida.
-      const response = await fetch('https://jsonplaceholder.typicode.com/users');
-      
-      // Verifica se a resposta HTTP está ok (status 200-299).
-      if (!response.ok) {
-        throw new Error(`Erro HTTP! Status: ${response.status}`);
-      }
-      
-      // response.json() também retorna uma Promise, por isso usamos 'await'.
-      // Ela converte o corpo da resposta JSON em um objeto JavaScript.
-      const users = await response.json();
-      return users;
-    } catch (error) {
-      // Propaga o erro para quem chamou.
-      throw new Error(`Erro no repositório: ${error.message}`);
-    }
-  }
-}
+import { UserRepository } from './UserRepository.js';
 
-// ===== Exemplo de uso (usage.js) =====
-// Para testar a API real:
+describe('UserRepository', () => {
+  let repository;
 
-// async function main() {
-//   const repo = new UserRepository();
-//   const service = new UserService(repo);
-//   try {
-//     const users = await service.getUsers();
-//     console.log('Users:', users);
-//   } catch (err) {
-//     console.error('Erro:', err.message);
-//   }
-// }
+  beforeEach(() => {
+    // Inicializa nova instância do repositório antes de cada teste para isolamento
+    repository = new UserRepository();
+    // Limpa todos os mocks para evitar interferência entre testes
+    jest.clearAllMocks();
+  });
 
-// main();
+  it('deve buscar usuários com sucesso da URL correta', async () => {
+    // Prepara dados mockados para simular resposta da API
+    const mockUsers = [{ id: 1, name: 'John Doe' }];
+    // Mock global do fetch para controlar a resposta da requisição HTTP
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockUsers),
+      })
+    );
+
+    // Executa o método sob teste
+    const users = await repository.getUsers();
+
+    // Verifica se fetch foi chamado com a URL correta
+    expect(global.fetch).toHaveBeenCalledWith('https://jsonplaceholder.typicode.com/users');
+    // Verifica se os usuários retornados são os esperados
+    expect(users).toEqual(mockUsers);
+  });
+
+  it('deve lançar erro com mensagem específica em caso de falha HTTP 500', async () => {
+    // Mock do fetch para simular erro HTTP com status 500
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+      })
+    );
+
+    // Verifica se o erro lançado corresponde exatamente à mensagem esperada
+    await expect(repository.getUsers()).rejects.toThrow(
+      'Erro ao buscar usuários: Erro HTTP! Status: 500'
+    );
+  });
+});
 
 
-// ===== UserService.test.js =====
-// Testes unitários simplificados com Jest.
-// Instale: npm init -y && npm i --save-dev jest
-// Rode: npx jest UserService.test.js
+// /*
+//   run.spec.js - Verificado e confirmado correto
+//   - Testa função run que orquestra o fluxo (service -> repo)
+//   - Usa mocks para isolar dependências
+//   - Estrutura didática com comentários
+// */
+
+// import { run } from './run';
+
+// // Mock do UserService para teste de integração
+// jest.mock('./UserService');
+
+// const MockedUserService = require('./UserService');
+
+// describe('run', () => {
+//   beforeEach(() => {
+//     // Limpa mocks antes de cada teste
+//     jest.clearAllMocks();
+//   });
+
+//   test('deve executar o fluxo completo: service -> repository sem erros', async () => {
+//     // Configura mock do service para sucesso
+//     const mockService = {
+//       getUserNames: jest.fn().mockResolvedValue(['John', 'Jane']),
+//     };
+//     MockedUserService.default = jest.fn(() => mockService);
+
+//     // Executa a função run sob teste
+//     await run();
+
+//     // Verifica se service foi instanciado e método chamado
+//     expect(MockedUserService.default).toHaveBeenCalled();
+//     expect(mockService.getUserNames).toHaveBeenCalledTimes(1);
+//   });
+// });

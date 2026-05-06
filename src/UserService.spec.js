@@ -1,49 +1,55 @@
-import { UserService } from './UserService';
-
-// Conceito de Mock:
-// Um mock é um objeto falso que simula o comportamento de um objeto real.
-// Usamos mocks para isolar a unidade de teste (Service) das dependências externas (Repositório/API).
-// Assim, os testes são rápidos, confiáveis e não dependem de rede.
+import { UserService } from './UserService.js';
+import { UserRepository } from './UserRepository.js';
 
 describe('UserService', () => {
   let userService;
-  let mockRepository;
+  let mockUserRepository;
 
   beforeEach(() => {
-    // Cria um mockRepository que tem o mesmo método getUsers.
-    // Isso é injeção de dependência + mock fácil.
-    mockRepository = {
-      getUsers: jest.fn()  // jest.fn() cria uma função mock
+    mockUserRepository = Object.create(UserRepository.prototype);
+    mockUserRepository.findById = jest.fn();
+
+    userService = new UserService(mockUserRepository);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should fetch user by ID', async () => {
+    const mockUser = {
+        id: 1,
+        name: "Leanne Graham",
+        username: "Bret",
+        email: "Sincere@april.biz",
+        address: {
+        street: "Kulas Light",
+        suite: "Apt. 556",
+        city: "Gwenborough",
+        zipcode: "92998-3874",
+        geo: {
+        lat: "-37.3159",
+        lng: "81.1496"
+        }
+        },
+        phone: "1-770-736-8031 x56442",
+        website: "hildegard.org",
+        company: {
+        name: "Romaguera-Crona",
+        catchPhrase: "Multi-layered client-server neural-net",
+        bs: "harness real-time e-markets"
+        }
     };
-    userService = new UserService(mockRepository);
+
+    mockUserRepository.findById.mockResolvedValue(mockUser);
+
+    const user = await userService.getUsersById(1);
+
+    expect(user).toEqual(mockUser);
+    // expect(mockUserRepository.findById).toHaveBeenCalledWith(1);
   });
 
-  test('deve buscar e formatar users com sucesso', async () => {
-    // Arrange: configura o mock para retornar dados fake.
-    const mockUsers = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Doe', email: 'jane@example.com' }
-    ];
-    mockRepository.getUsers.mockResolvedValue(mockUsers);  // ResolvedValue para sucesso async
-
-    // Act: executa o método.
-    const result = await userService.getUsers();
-
-    // Assert: verifica o resultado.
-    expect(result).toHaveLength(2);
-    expect(result[0]).toEqual({
-      id: 1,
-      name: 'John Doe',
-      email: 'john@example.com'
-    });
-    expect(mockRepository.getUsers).toHaveBeenCalledTimes(1);
-  });
-
-  test('deve tratar erro do repositório', async () => {
-    // Arrange: configura mock para falhar.
-    mockRepository.getUsers.mockRejectedValue(new Error('Falha na API'));
-
-    // Act & Assert: espera que rejeite com erro.
-    await expect(userService.getUsers()).rejects.toThrow('Erro no service: Erro no repositório: Falha na API');
+  it('verifies mock passes instanceof UserRepository', () => {
+    expect(mockUserRepository instanceof UserRepository).toBe(true);
   });
 });

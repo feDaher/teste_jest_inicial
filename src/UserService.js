@@ -26,6 +26,11 @@ export class UserService {
       email: usuario.email
     }));
   }
+
+  async getUsersById(id) {
+    const user = await this.userRepository.getUserById(id);
+    return user;
+  }
 }
 
 // ===== Exemplo de uso (usage.js) =====

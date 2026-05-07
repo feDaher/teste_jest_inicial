@@ -1,11 +1,3 @@
-/*
-  run.js - Demonstration script for UserRepository and UserService
-  ---------------------------------------------------------------
-  Part 1: Raw data retrieval from UserRepository
-  Part 2: Formatted data via UserService (id, name, email)
-  Part 3: Fetching specific user by ID
-*/
-
 import { UserRepository } from './UserRepository.js';
 import { UserService } from './UserService.js';
 
@@ -25,7 +17,6 @@ async function runDemonstration() {
   console.log('\n=== PART 2: UserService (FORMATTED DATA: id, name, email) ===');
   const userService = new UserService(userRepository);
   try {
-    // Injecting dependency via constructor
     const formattedUsers = await userService.getUsers();
     console.table(formattedUsers);
     console.log(`\nTotal formatted users: ${formattedUsers.length}`);
@@ -46,7 +37,6 @@ async function runDemonstration() {
   }
 }
 
-// Self-invoking execution block
 (async () => {
   try {
     await runDemonstration();
@@ -54,10 +44,3 @@ async function runDemonstration() {
     console.error('Critical failure in execution:', criticalError.message);
   }
 })();
-
-/*
-  EXECUTION STEPS:
-  1. Ensure all 3 files (UserRepository.js, UserService.js, run.js) are in the same folder.
-  2. Verify package.json contains: { "type": "module" }
-  3. Run command: node run.js
-*/

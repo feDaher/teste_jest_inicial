@@ -1,5 +1,3 @@
-// Classe de serviço que recebe UserRepository por injeção de dependência
-// Formata os dados selecionando apenas id, name e email
 import { UserRepository } from './UserRepository.js';
 
 export class UserService {
@@ -32,25 +30,3 @@ export class UserService {
     return user;
   }
 }
-
-// ===== Exemplo de uso (usage.js) =====
-// Para testar a API real:
-
-// async function main() {
-//   const repo = new UserRepository();
-//   const service = new UserService(repo);
-//   try {
-//     const users = await service.getUsers();
-//     console.log('Users:', users);
-//   } catch (err) {
-//     console.error('Erro:', err.message);
-//   }
-// }
-
-// main();
-
-
-// ===== UserService.test.js =====
-// Testes unitários simplificados com Jest.
-// Instale: npm init -y && npm i --save-dev jest
-// Rode: npx jest UserService.test.js

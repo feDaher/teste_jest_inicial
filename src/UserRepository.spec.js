@@ -1,11 +1,3 @@
-/*
-  UserRepository.spec.js - Arquivo de teste corrigido
-  Correções aplicadas:
-  - URL esperada: 'https://jsonplaceholder.typicode.com/users'
-  - Mensagem de erro: 'Erro ao buscar usuários: Erro HTTP! Status: 500'
-  - Mantida estrutura com comentários didáticos linha a linha
-*/
-
 import { UserRepository } from './UserRepository.js';
 
 describe('UserRepository', () => {
@@ -53,40 +45,3 @@ describe('UserRepository', () => {
     );
   });
 });
-
-
-// /*
-//   run.spec.js - Verificado e confirmado correto
-//   - Testa função run que orquestra o fluxo (service -> repo)
-//   - Usa mocks para isolar dependências
-//   - Estrutura didática com comentários
-// */
-
-// import { run } from './run';
-
-// // Mock do UserService para teste de integração
-// jest.mock('./UserService');
-
-// const MockedUserService = require('./UserService');
-
-// describe('run', () => {
-//   beforeEach(() => {
-//     // Limpa mocks antes de cada teste
-//     jest.clearAllMocks();
-//   });
-
-//   test('deve executar o fluxo completo: service -> repository sem erros', async () => {
-//     // Configura mock do service para sucesso
-//     const mockService = {
-//       getUserNames: jest.fn().mockResolvedValue(['John', 'Jane']),
-//     };
-//     MockedUserService.default = jest.fn(() => mockService);
-
-//     // Executa a função run sob teste
-//     await run();
-
-//     // Verifica se service foi instanciado e método chamado
-//     expect(MockedUserService.default).toHaveBeenCalled();
-//     expect(mockService.getUserNames).toHaveBeenCalledTimes(1);
-//   });
-// });

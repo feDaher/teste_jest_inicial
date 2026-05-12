@@ -1,55 +1,58 @@
 import { UserService } from './UserService.js';
+
+jest.mock('./UserRepository.js');
 import { UserRepository } from './UserRepository.js';
 
 describe('UserService', () => {
-  let userService;
-  let mockUserRepository;
-
   beforeEach(() => {
-    mockUserRepository = Object.create(UserRepository.prototype);
-    mockUserRepository.findById = jest.fn();
-
-    userService = new UserService(mockUserRepository);
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should fetch user by ID', async () => {
-    const mockUser = {
-        id: 1,
-        name: "Leanne Graham",
-        username: "Bret",
-        email: "Sincere@april.biz",
-        address: {
-        street: "Kulas Light",
-        suite: "Apt. 556",
-        city: "Gwenborough",
-        zipcode: "92998-3874",
-        geo: {
-        lat: "-37.3159",
-        lng: "81.1496"
-        }
-        },
-        phone: "1-770-736-8031 x56442",
-        website: "hildegard.org",
-        company: {
-        name: "Romaguera-Crona",
-        catchPhrase: "Multi-layered client-server neural-net",
-        bs: "harness real-time e-markets"
-        }
-    };
-
-    mockUserRepository.findById.mockResolvedValue(mockUser);
-
-    const user = await userService.getUsersById(1);
-
-    expect(user).toEqual(mockUser);
-    // expect(mockUserRepository.findById).toHaveBeenCalledWith(1);
+  it('constructor - aceita instância válida de UserRepository', () => {
+    const mockUserRepository = new UserRepository();
+    expect(() => new UserService(mockUserRepository)).not.toThrow();
   });
 
-  it('verifies mock passes instanceof UserRepository', () => {
-    expect(mockUserRepository instanceof UserRepository).toBe(true);
+  it('constructor - lança erro se userRepository não for instância de UserRepository', () => {
+    expect(() => new UserService({})).toThrow('userRepository deve ser uma instância de UserRepository');
+  });
+
+  it('getUsers - retorna usuários formatados sem campos extras', async () => {
+    const mockUserRepository = new UserRepository();
+    const rawUsers = [
+      { id: 1, name: 'João', email: 'joao@email.com', senha: '123' },
+      { id: 2, name: 'Maria', email: 'maria@email.com', extra: 'ignorado' }
+    ];
+    mockUserRepository.getUsers.mockResolvedValue(rawUsers);
+
+    const userService = new UserService(mockUserRepository);
+    const result = await userService.getUsers();
+
+    expect(result).toEqual([
+      { id: 1, name: 'João', email: 'joao@email.com' },
+      { id: 2, name: 'Maria', email: 'maria@email.com' }
+    ]);
+    expect(mockUserRepository.getUsers).toHaveBeenCalledTimes(1);
+    expect(mockUserRepository.getUsers).toHaveBeenCalledWith();
+  });
+
+  it('getUsersById - retorna o usuário completo pelo ID', async () => {
+    const mockUserRepository = new UserRepository();
+    const userComplete = {
+      id: 1,
+      name: 'João',
+      email: 'joao@email.com',
+      senha: '123456',
+      role: 'admin'
+    };
+    const id = 1;
+    mockUserRepository.getUserById.mockResolvedValue(userComplete);
+
+    const userService = new UserService(mockUserRepository);
+    const result = await userService.getUsersById(id);
+
+    expect(result).toEqual(userComplete);
+    expect(mockUserRepository.getUserById).toHaveBeenCalledTimes(1);
+    expect(mockUserRepository.getUserById).toHaveBeenCalledWith(id);
   });
 });

@@ -1,47 +1,95 @@
-import { UserRepository } from './UserRepository.js';
+import { UserRepository } from './UserRepository';
+
+beforeAll(() => {
+  global.fetch = jest.fn();
+});
+
+beforeEach(() => {
+  fetch.mockClear();
+});
+
+afterAll(() => {
+  delete global.fetch;
+});
 
 describe('UserRepository', () => {
-  let repository;
-
-  beforeEach(() => {
-    // Inicializa nova instância do repositório antes de cada teste para isolamento
-    repository = new UserRepository();
-    // Limpa todos os mocks para evitar interferência entre testes
-    jest.clearAllMocks();
-  });
-
-  it('deve buscar usuários com sucesso da URL correta', async () => {
-    // Prepara dados mockados para simular resposta da API
-    const mockUsers = [{ id: 1, name: 'John Doe' }];
-    // Mock global do fetch para controlar a resposta da requisição HTTP
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
+  describe('getUsers', () => {
+    it('deve retornar a lista de usuários quando a requisição é bem-sucedida', async () => {
+      const mockUsers = [
+        { id: 1, name: 'John Doe' },
+        { id: 2, name: 'Jane Doe' }
+      ];
+      const mockResponse = {
         ok: true,
-        json: () => Promise.resolve(mockUsers),
-      })
-    );
+        json: jest.fn().mockResolvedValue(mockUsers)
+      };
+      fetch.mockResolvedValue(mockResponse);
 
-    // Executa o método sob teste
-    const users = await repository.getUsers();
+      const repository = new UserRepository();
+      const users = await repository.getUsers();
 
-    // Verifica se fetch foi chamado com a URL correta
-    expect(global.fetch).toHaveBeenCalledWith('https://jsonplaceholder.typicode.com/users');
-    // Verifica se os usuários retornados são os esperados
-    expect(users).toEqual(mockUsers);
+      expect(users).toEqual(mockUsers);
+      expect(fetch).toHaveBeenCalledWith('https://jsonplaceholder.typicode.com/users');
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('deve lançar erro quando a resposta HTTP não é bem-sucedida', async () => {
+      const mockResponse = {
+        ok: false,
+        status: 404
+      };
+      fetch.mockResolvedValue(mockResponse);
+
+      const repository = new UserRepository();
+      await expect(repository.getUsers()).rejects.toThrow('Erro HTTP! Status: 404');
+    });
+
+    it('deve lançar erro quando há falha de rede', async () => {
+      const errorMessage = 'falha de rede';
+      fetch.mockRejectedValue(new Error(errorMessage));
+
+      const repository = new UserRepository();
+      await expect(repository.getUsers()).rejects.toThrow(`Erro ao buscar usuários: ${errorMessage}`);
+    });
   });
 
-  it('deve lançar erro com mensagem específica em caso de falha HTTP 500', async () => {
-    // Mock do fetch para simular erro HTTP com status 500
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: false,
-        status: 500,
-      })
-    );
+  describe('getUserById', () => {
+    it('deve retornar o usuário pelo ID quando a requisição é bem-sucedida', async () => {
+      const userId = 1;
+      const mockUser = { id: userId, name: 'John Doe' };
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockUser)
+      };
+      fetch.mockResolvedValue(mockResponse);
 
-    // Verifica se o erro lançado corresponde exatamente à mensagem esperada
-    await expect(repository.getUsers()).rejects.toThrow(
-      'Erro ao buscar usuários: Erro HTTP! Status: 500'
-    );
+      const repository = new UserRepository();
+      const user = await repository.getUserById(userId);
+
+      expect(user).toEqual(mockUser);
+      expect(fetch).toHaveBeenCalledWith(`https://jsonplaceholder.typicode.com/users/${userId}`);
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('deve lançar erro quando a resposta HTTP não é bem-sucedida', async () => {
+      const userId = 999;
+      const mockResponse = {
+        ok: false,
+        status: 404
+      };
+      fetch.mockResolvedValue(mockResponse);
+
+      const repository = new UserRepository();
+      await expect(repository.getUserById(userId)).rejects.toThrow('Erro HTTP! Status: 404');
+    });
+
+    it('deve lançar erro quando há falha de rede', async () => {
+      const userId = 1;
+      const errorMessage = 'falha de rede';
+      fetch.mockRejectedValue(new Error(errorMessage));
+
+      const repository = new UserRepository();
+      await expect(repository.getUserById(userId)).rejects.toThrow(`Erro ao buscar usuários: ${errorMessage}`);
+    });
   });
 });

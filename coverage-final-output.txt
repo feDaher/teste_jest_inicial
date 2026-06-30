@@ -1,0 +1,25 @@
+
+> es-module-project@1.0.0 coverage
+> jest --coverage
+
+PASS src/UserRepository.spec.js
+PASS src/run.spec.js
+PASS src/validateEmail.spec.js
+PASS src/sum.spec.js
+PASS src/UserService.spec.js
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |     100 |      100 |     100 |     100 |                   
+ UserRepository.js |     100 |      100 |     100 |     100 |                   
+ UserService.js    |     100 |      100 |     100 |     100 |                   
+ run.js            |     100 |      100 |     100 |     100 |                   
+ sum.js            |     100 |      100 |     100 |     100 |                   
+ validateEmail.js  |     100 |      100 |     100 |     100 |                   
+-------------------|---------|----------|---------|---------|-------------------
+
+Test Suites: 5 passed, 5 total
+Tests:       25 passed, 25 total
+Snapshots:   0 total
+Time:        2.284 s
+Ran all test suites.
